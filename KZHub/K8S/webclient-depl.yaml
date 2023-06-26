@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webclient-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webclient
+  template:
+    metadata:
+      labels:
+        app: webclient
+    spec:
+      containers:
+        - name: kzhub-webclient
+          image: iwaneq/kzhub-webclient:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webclient-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: webclient
+  ports:
+  - name: webclient
+    protocol: TCP
+    port: 80
+    targetPort: 80
