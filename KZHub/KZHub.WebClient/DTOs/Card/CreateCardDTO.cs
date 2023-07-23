@@ -2,10 +2,10 @@
 {
     public class CreateCardDTO
     {
-        public string? Zastep { get; set; }
-        public DateTime Date { get; set; }
-        public string? Place { get; set; }
+        public string Zastep { get; set; } = string.Empty;
+        public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.UtcNow);
+        public string Place { get; set; } = string.Empty;
         public List<CreatePointDTO> Points { get; set; } = new List<CreatePointDTO>();
-        public List<string> RequiredItems { get; set; } = new List<string>();
+        public string? RequiredItems { get; set; }
     }
 }
