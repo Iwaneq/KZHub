@@ -1,0 +1,41 @@
+﻿@page "/card/create"
+@using KZHub.WebClient.DTOs.Card;
+
+
+<h3>Create your new Card!</h3>
+
+<form method="post" @onsubmit="PostCard">
+    <label class="fw-bold me-2">Zastęp: <input @bind-value="Card.Zastep" /></label>
+    <label class="fw-bold me-2">Datum: <input @bind-value="Card.Date" type="date" /></label>
+    <label class="fw-bold me-2">Miejsce: <input @bind-value="Card.Place" /></label><br />
+
+    @foreach(var p in Card.Points)
+    {
+        <div class="d-block m-2">
+            <label class="fw-bold me-2">Czas: <input @bind-value="p.Time" type="time" /></label>
+            <label class="fw-bold me-2">Co robimy? <input @bind-value="p.Title" /></label>
+            <label class="fw-bold me-2">Kto? <input @bind-value="p.ZastepMember" /></label>
+        </div>
+    }
+    <button class="m-1" @onclick="AddPoint" type="button">Dodaj punkt zbiórki!</button><br/>
+
+    <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
+
+    <input class="m-1" type="submit" value="Wyślij!" />
+</form>
+
+@code {
+    public CreateCardDTO Card = new CreateCardDTO();
+
+
+    private void PostCard()
+    {
+
+    }
+
+    private void AddPoint()
+    {
+        Card.Points.Add(new CreatePointDTO());
+    }
+
+}
