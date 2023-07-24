@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cardgeneration-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cardgeneration
+  template:
+    metadata:
+      labels:
+        app: cardgeneration
+    spec:
+      containers:
+        - name: kzhub-cardgenerationservice
+          image: iwaneq/kzhub-cardgenerationservice:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cardgeneration-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: cardgeneration
+  ports:
+  - name: cardgeneration
+    protocol: TCP
+    port: 80
+    targetPort: 80
