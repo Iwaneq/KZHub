@@ -1,6 +1,4 @@
-using KZHub.WebClient.Data;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
+using KZHub.WebClient.DependencyInjection;
 
 namespace KZHub.WebClient
 {
@@ -13,6 +11,8 @@ namespace KZHub.WebClient
             // Add services to the container.
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
+
+            builder.Services.AddServices();
 
             var app = builder.Build();
 

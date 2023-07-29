@@ -1,5 +1,7 @@
 ﻿@page "/card/create"
+@using KZHub.WebClient.AsyncDataServices;
 @using KZHub.WebClient.DTOs.Card;
+@inject IMessageBusClient _messageBusClient;
 
 
 <h3>Create your new Card!</h3>
@@ -30,7 +32,8 @@
 
     private void PostCard()
     {
-
+        //Send data to CardGenerationService
+        _messageBusClient.SendCardToGenerate(Card);
     }
 
     private void AddPoint()

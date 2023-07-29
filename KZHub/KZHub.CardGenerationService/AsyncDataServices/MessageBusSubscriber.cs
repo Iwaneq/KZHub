@@ -1,4 +1,5 @@
 ﻿using KZHub.CardGenerationService.DTOs.Card;
+using KZHub.CardGenerationService.Services.CardProcessing;
 using KZHub.CardGenerationService.Services.CardProcessing.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -10,15 +11,15 @@ namespace KZHub.CardGenerationService.AsyncDataServices
     public class MessageBusSubscriber : BackgroundService
     {
         private readonly IConfiguration _configuration;
-        private readonly ICardGenerator _cardGenerator;
+        private readonly IServiceScopeFactory _scopeFactory;
         private IConnection _connection;
         private IModel _channel;
         private string _queueName;
 
-        public MessageBusSubscriber(IConfiguration configuration, ICardGenerator cardGenerator)
+        public MessageBusSubscriber(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
-            _cardGenerator = cardGenerator;
+            _scopeFactory = scopeFactory;
 
             InitializeRabbitMQ();
         }
@@ -60,7 +61,13 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
                 if(cardDTO is not null)
                 {
-                    var card = _cardGenerator.GenerateCard(cardDTO);
+                    using(var scope = _scopeFactory.CreateScope())
+                    {
+                        var cardGenerator = scope.ServiceProvider.GetRequiredService<ICardGenerator>();
+                        var card = cardGenerator.GenerateCard(cardDTO);
+
+                        Console.WriteLine("--> Consumer Received");
+                    }
                 }
             };
 
