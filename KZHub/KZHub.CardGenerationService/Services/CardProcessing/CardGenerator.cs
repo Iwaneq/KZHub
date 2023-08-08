@@ -14,6 +14,7 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
 
         public SKBitmap GenerateCard(CreateCardDTO cardDTO)
         {
+            Console.WriteLine("--> Generating card...");
             SKBitmap card;
             using (var fileStream = new FileStream(Path.Combine(Environment.CurrentDirectory, @"Resources", "karta.png"), FileMode.Open))
             {
@@ -33,14 +34,13 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
 
                 if (!string.IsNullOrEmpty(cardDTO.RequiredItems)) DrawRequiredItems(canvas, cardDTO.RequiredItems);
 
-                using (var data = card.Encode(SKEncodedImageFormat.Png, 80))
-                {
-                    // save the data to a stream
-                    using (var stream = File.OpenWrite(Path.Combine("C:\\data\\KartaZbiorkiMaker\\Karty", "1.png")))
-                    {
-                        data.SaveTo(stream);
-                    }
-                }
+                //using (var data = card.Encode(SKEncodedImageFormat.Png, 80))
+                //{
+                //    using (var stream = File.OpenWrite(Path.Combine("C:\\data\\KartaZbiorkiMaker\\Karty", "1.png")))
+                //    {
+                //        data.SaveTo(stream);
+                //    }
+                //}
             }
 
             Console.WriteLine("--> Card was generated!");

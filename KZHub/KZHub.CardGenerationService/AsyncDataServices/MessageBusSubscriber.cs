@@ -59,12 +59,22 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
                 CreateCardDTO? cardDTO = JsonSerializer.Deserialize<CreateCardDTO>(notificationMessage);
 
-                if(cardDTO is not null)
+                Console.WriteLine($"--> Consumer Reciving... {cardDTO}");
+                if (cardDTO is not null)
                 {
-                    using(var scope = _scopeFactory.CreateScope())
+                    using (var scope = _scopeFactory.CreateScope())
                     {
                         var cardGenerator = scope.ServiceProvider.GetRequiredService<ICardGenerator>();
-                        var card = cardGenerator.GenerateCard(cardDTO);
+
+                        try
+                        {
+                            var card = cardGenerator.GenerateCard(cardDTO);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"--> EXCEPTION WAS THROWN WHILE GENERATING CARD: {ex.Message}");
+                            throw;
+                        }
 
                         Console.WriteLine("--> Consumer Received");
                     }
