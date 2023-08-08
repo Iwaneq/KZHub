@@ -1,4 +1,5 @@
-﻿using KZHub.CardGenerationService.Services.CardProcessing;
+﻿using KZHub.CardGenerationService.AsyncDataServices;
+using KZHub.CardGenerationService.Services.CardProcessing;
 using KZHub.CardGenerationService.Services.CardProcessing.Interfaces;
 
 namespace KZHub.CardGenerationService.DependencyInjection
@@ -8,6 +9,7 @@ namespace KZHub.CardGenerationService.DependencyInjection
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<ICardGenerator, CardGenerator>();
+            services.AddHostedService<MessageBusSubscriber>();
         }
     }
 }

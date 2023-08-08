@@ -1,10 +1,10 @@
 ﻿using KZHub.CardGenerationService.DTOs.Card;
-using System.Drawing;
+using SkiaSharp;
 
 namespace KZHub.CardGenerationService.Services.CardProcessing.Interfaces
 {
     public interface ICardGenerator
     {
-        Bitmap GenerateCard(CreateCardDTO cardDTO);
+        SKBitmap GenerateCard(CreateCardDTO cardDTO);
     }
 }
