@@ -2,7 +2,7 @@
 {
     public class CreatePointDTO
     {
-        public TimeOnly Time { get; set; }
+        public DateTime Time { get; set; }
         public string? Title { get; set; }
         public string? ZastepMember { get; set; }
     }

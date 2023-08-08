@@ -56,7 +56,7 @@ namespace KZHub.CardGenerationService.AsyncDataServices
             {
                 var body = ea.Body;
                 var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
- 
+
                 CreateCardDTO? cardDTO = JsonSerializer.Deserialize<CreateCardDTO>(notificationMessage);
 
                 if(cardDTO is not null)
