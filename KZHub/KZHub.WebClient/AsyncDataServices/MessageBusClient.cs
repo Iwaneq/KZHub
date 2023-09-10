@@ -5,15 +5,16 @@ using RabbitMQ.Client.Exceptions;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 
 namespace KZHub.WebClient.AsyncDataServices
 {
     public class MessageBusClient : IMessageBusClient
     {
         private readonly IConfiguration _configuration;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
-        private readonly string _replyQueueName;
+        private readonly IConnection? _connection;
+        private readonly IModel? _channel;
+        private readonly string? _replyQueueName;
 
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]>> callbackMapper = new();
 
@@ -59,15 +60,18 @@ namespace KZHub.WebClient.AsyncDataServices
 
         public Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
+            if (_channel is null) throw new ChannelClosedException("Channel was closed");
+
             IBasicProperties props = _channel.CreateBasicProperties();
             var correlationId = Guid.NewGuid().ToString();
             props.CorrelationId = correlationId;
             props.ReplyTo = _replyQueueName;
             var message = JsonSerializer.Serialize(createCard);
+
             var tcs = new TaskCompletionSource<byte[]>();
             callbackMapper.TryAdd(correlationId, tcs);
 
-            if (_connection.IsOpen)
+            if (_connection != null && _connection.IsOpen)
             {
                 var body = Encoding.UTF8.GetBytes(message);
 
@@ -84,10 +88,10 @@ namespace KZHub.WebClient.AsyncDataServices
 
         private void Dispose()
         {
-            if (_channel.IsOpen)
+            if (_channel != null && _channel.IsOpen)
             {
                 _channel.Close();
-                _connection.Close();
+                _connection?.Close();
             }
         }
 
