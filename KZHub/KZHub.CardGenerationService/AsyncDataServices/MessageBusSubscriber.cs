@@ -3,6 +3,7 @@ using KZHub.CardGenerationService.Services.CardProcessing.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using SkiaSharp;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 
@@ -83,15 +84,19 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
                         Console.WriteLine("--> Consumer Received");
 
+                        using (MemoryStream memStream = new MemoryStream())
+                        using (SKManagedWStream wstream = new SKManagedWStream(memStream))
+                        {
+                            card.Encode(wstream, SKEncodedImageFormat.Png, 100);
+                            byte[] data = memStream.ToArray();
 
-                        var bytes = card.Bytes;
-
-                        _channel.BasicPublish(exchange: string.Empty,
-                             routingKey: props.ReplyTo,
-                             basicProperties: replyProps,
-                             body: bytes);
-                        _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
-                        Console.WriteLine("--> Card was sent to the Client");
+                            _channel.BasicPublish(exchange: string.Empty,
+                                 routingKey: props.ReplyTo,
+                                 basicProperties: replyProps,
+                                 body: data);
+                            _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
+                            Console.WriteLine("--> Card was sent to the Client");
+                        }
                     }
                 }
             };

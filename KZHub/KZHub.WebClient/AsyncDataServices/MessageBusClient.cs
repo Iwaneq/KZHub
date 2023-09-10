@@ -1,14 +1,10 @@
 ﻿using KZHub.WebClient.DTOs.Card;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SkiaSharp;
+using RabbitMQ.Client.Exceptions;
 using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace KZHub.WebClient.AsyncDataServices
 {
@@ -19,7 +15,9 @@ namespace KZHub.WebClient.AsyncDataServices
         private readonly IModel _channel;
         private readonly string _replyQueueName;
 
-        public MessageBusClient(IConfiguration configuration)
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]>> callbackMapper = new();
+
+        public MessageBusClient(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
             var factory = new ConnectionFactory()
@@ -37,20 +35,12 @@ namespace KZHub.WebClient.AsyncDataServices
                 var consumer = new EventingBasicConsumer(_channel);
                 consumer.Received += (model, ea) =>
                 {
+                    if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
+                        return;
+
                     var body = ea.Body.ToArray();
-                    var bitmap = new SKBitmap();
-                    var gcHandle = GCHandle.Alloc(body, GCHandleType.Pinned);
 
-                    var info = new SKImageInfo(1164,1653, SKImageInfo.PlatformColorType, SKAlphaType.Unpremul);
-                    bitmap.InstallPixels(info, gcHandle.AddrOfPinnedObject(), info.RowBytes, delegate { gcHandle.Free(); }, null);
-                    using (var data = bitmap.Encode(SKEncodedImageFormat.Png, 80))
-                    using (var stream = File.OpenWrite(Path.Combine(@"C:\data\KartaZbiorkiMaker\Karty", "1.png")))
-                    {
-                        // save the data to a stream
-                        data.SaveTo(stream);
-                    }
-
-                    //DO SOMETHING WITH RESPONSE
+                    tcs.TrySetResult(body);
                 };
 
                 _channel.BasicConsume(consumer: consumer,
@@ -67,23 +57,29 @@ namespace KZHub.WebClient.AsyncDataServices
             }
         }
 
-        public void SendCardToGenerate(CreateCardDTO createCard)
+        public Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
             IBasicProperties props = _channel.CreateBasicProperties();
             var correlationId = Guid.NewGuid().ToString();
             props.CorrelationId = correlationId;
             props.ReplyTo = _replyQueueName;
             var message = JsonSerializer.Serialize(createCard);
+            var tcs = new TaskCompletionSource<byte[]>();
+            callbackMapper.TryAdd(correlationId, tcs);
 
-            if(_connection.IsOpen)
+            if (_connection.IsOpen)
             {
                 var body = Encoding.UTF8.GetBytes(message);
 
                 _channel.BasicPublish(exchange: string.Empty,
                     routingKey: "cardGeneration_queue",
                     basicProperties: props,
-                    body: body);
+                body: body);
+
+                cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
+                return tcs.Task;
             }
+            throw new ConnectFailureException("Connection was not open", null);
         }
 
         private void Dispose()
