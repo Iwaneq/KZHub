@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace KZHub.CardGenerationService.DTOs.Card
+﻿namespace KZHub.CardGenerationService.DTOs.Card
 {
     public class CreateCardDTO
     {

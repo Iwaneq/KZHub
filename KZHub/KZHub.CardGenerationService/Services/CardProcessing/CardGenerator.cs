@@ -9,8 +9,8 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
         //Rectangles
         static SKRect zastepRect = new SKRect() { Location = new SKPoint(220, 190), Size = new SKSize(405, 55) };
         static SKRect dateRect = new SKRect() { Location = new SKPoint(85, 305), Size = new SKSize(500, 50) };
-        static SKRect placeRect = new SKRect() { Location = new SKPoint(590, 305), Size = new SKSize(1000, 50)};
-        static SKRect requiredItemsRect = new SKRect() { Location = new SKPoint(85, 1075), Size = new SKSize(1000, 280)};
+        static SKRect placeRect = new SKRect() { Location = new SKPoint(590, 305), Size = new SKSize(1000, 50) };
+        static SKRect requiredItemsRect = new SKRect() { Location = new SKPoint(85, 1075), Size = new SKSize(1000, 280) };
 
         public SKBitmap GenerateCard(CreateCardDTO cardDTO)
         {
@@ -18,11 +18,11 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
             SKBitmap card;
             using (var fileStream = new FileStream(Path.Combine(Environment.CurrentDirectory, @"Resources", "karta.png"), FileMode.Open))
             {
-                 card = SKBitmap.Decode(fileStream);
+                card = SKBitmap.Decode(fileStream);
             }
             Console.WriteLine(card.Width + " " + card.Height + " " + card.ToString());
 
-            using(SKCanvas canvas = new SKCanvas(card))
+            using (SKCanvas canvas = new SKCanvas(card))
             {
                 if (!string.IsNullOrEmpty(cardDTO.Zastep)) DrawZastep(canvas, cardDTO.Zastep);
 
@@ -30,7 +30,7 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
 
                 if (!string.IsNullOrEmpty(cardDTO.Place)) DrawPlace(canvas, cardDTO.Place);
 
-                if(cardDTO.Points.Count != 0) DrawPoints(canvas, cardDTO.Points);
+                if (cardDTO.Points.Count != 0) DrawPoints(canvas, cardDTO.Points);
 
                 if (!string.IsNullOrEmpty(cardDTO.RequiredItems)) DrawRequiredItems(canvas, cardDTO.RequiredItems);
 
@@ -82,9 +82,9 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
 
             float height = 585 / points.Count;
 
-            SKRect pointRect = new SKRect() { Location = new SKPoint(225, 420), Size = new SKSize(515, height)};
-            SKRect timeRect = new SKRect() { Location = new SKPoint(85, 420), Size = new SKSize(135, height)};
-            SKRect whoRect = new SKRect() { Location = new SKPoint(740, 420), Size = new SKSize(220, height)};
+            SKRect pointRect = new SKRect() { Location = new SKPoint(225, 420), Size = new SKSize(515, height) };
+            SKRect timeRect = new SKRect() { Location = new SKPoint(85, 420), Size = new SKSize(135, height) };
+            SKRect whoRect = new SKRect() { Location = new SKPoint(740, 420), Size = new SKSize(220, height) };
 
             //Draw czas
             DrawTime(card, pointsFont, timeRect, points);

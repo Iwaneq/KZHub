@@ -1,17 +1,24 @@
 ﻿using KZHub.WebClient.DTOs.Card;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
+using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Channels;
 
 namespace KZHub.WebClient.AsyncDataServices
 {
     public class MessageBusClient : IMessageBusClient
     {
         private readonly IConfiguration _configuration;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        private readonly IConnection? _connection;
+        private readonly IModel? _channel;
+        private readonly string? _replyQueueName;
 
-        public MessageBusClient(IConfiguration configuration)
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]>> callbackMapper = new();
+
+        public MessageBusClient(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
             var factory = new ConnectionFactory()
@@ -25,7 +32,21 @@ namespace KZHub.WebClient.AsyncDataServices
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
 
-                _channel.ExchangeDeclare(exchange: "trigger", type: ExchangeType.Fanout);
+                _replyQueueName = _channel.QueueDeclare().QueueName;
+                var consumer = new EventingBasicConsumer(_channel);
+                consumer.Received += (model, ea) =>
+                {
+                    if (!callbackMapper.TryRemove(ea.BasicProperties.CorrelationId, out var tcs))
+                        return;
+
+                    var body = ea.Body.ToArray();
+
+                    tcs.TrySetResult(body);
+                };
+
+                _channel.BasicConsume(consumer: consumer,
+                                      queue: _replyQueueName,
+                                      autoAck: true);
 
                 _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
@@ -37,27 +58,40 @@ namespace KZHub.WebClient.AsyncDataServices
             }
         }
 
-        public void SendCardToGenerate(CreateCardDTO createCard)
+        public Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
+            if (_channel is null) throw new ChannelClosedException("Channel was closed");
+
+            IBasicProperties props = _channel.CreateBasicProperties();
+            var correlationId = Guid.NewGuid().ToString();
+            props.CorrelationId = correlationId;
+            props.ReplyTo = _replyQueueName;
             var message = JsonSerializer.Serialize(createCard);
 
-            if(_connection.IsOpen)
+            var tcs = new TaskCompletionSource<byte[]>();
+            callbackMapper.TryAdd(correlationId, tcs);
+
+            if (_connection != null && _connection.IsOpen)
             {
                 var body = Encoding.UTF8.GetBytes(message);
 
-                _channel.BasicPublish(exchange: "trigger",
-                    routingKey: "",
-                    basicProperties: null,
-                    body: body);
+                _channel.BasicPublish(exchange: string.Empty,
+                    routingKey: "cardGeneration_queue",
+                    basicProperties: props,
+                body: body);
+
+                cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
+                return tcs.Task;
             }
+            throw new ConnectFailureException("Connection was not open", null);
         }
 
         private void Dispose()
         {
-            if (_channel.IsOpen)
+            if (_channel != null && _channel.IsOpen)
             {
                 _channel.Close();
-                _connection.Close();
+                _connection?.Close();
             }
         }
 
