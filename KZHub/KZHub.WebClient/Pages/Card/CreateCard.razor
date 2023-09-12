@@ -21,7 +21,9 @@
         <div class="d-block m-2">
             <label class="fw-bold me-2">Czas: <input @bind-value="p.Time" type="time" /></label>
             <label class="fw-bold me-2">Co robimy? <input @bind-value="p.Title" /></label>
+            <ValidationMessage For="@(() => p.Title)"/>
             <label class="fw-bold me-2">Kto? <input @bind-value="p.ZastepMember" /></label>
+            <ValidationMessage For="@(() => p.ZastepMember)" />
         </div>
     }
     <button class="m-1" @onclick="AddPoint" type="button">Dodaj punkt zbiórki!</button><br/>
