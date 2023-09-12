@@ -9,7 +9,9 @@
 
 <h3>Create your new Card!</h3>
 
-<form method="post" @onsubmit="PostCard">
+<EditForm method="post" OnValidSubmit="PostCard" Model="@Card">
+    <FluentValidationValidator/>
+    <ValidationSummary/>
     <label class="fw-bold me-2">Zastęp: <input @bind-value="Card.Zastep" /></label>
     <label class="fw-bold me-2">Datum: <input @bind-value="Card.Date" type="date" /></label>
     <label class="fw-bold me-2">Miejsce: <input @bind-value="Card.Place" /></label><br />
@@ -27,12 +29,11 @@
     <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
 
     <input class="m-1" type="submit" value="Wyślij!" />
-</form>
+</EditForm>
 
 @code {
-    public CreateCardDTO Card = new CreateCardDTO();
-
-
+    public CreateCardDTO Card = new();
+    
     private async Task PostCard()
     {
         //Send data to CardGenerationService
@@ -45,5 +46,4 @@
     {
         Card.Points.Add(new CreatePointDTO());
     }
-
 }
