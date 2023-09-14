@@ -9,13 +9,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardGenerationService
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6C37B110-61B8-41A6-8084-4AECAF0F674C}"
 	ProjectSection(SolutionItems) = preProject
-		cardgeneration-depl.yaml = cardgeneration-depl.yaml
+		K8S\cardgeneration-depl.yaml = K8S\cardgeneration-depl.yaml
 		cardgeneration-np-srv.yaml = cardgeneration-np-srv.yaml
+		K8S\cardstoring-depl.yaml = K8S\cardstoring-depl.yaml
 		K8S\webclient-depl.yaml = K8S\webclient-depl.yaml
 		K8S\webclient-np-srv.yaml = K8S\webclient-np-srv.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZHub.CardStoringService", "KZHub.CardStoringService\KZHub.CardStoringService.csproj", "{BF55A86B-B065-4400-8E40-F7E7BC164BE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardStoringService", "KZHub.CardStoringService\KZHub.CardStoringService.csproj", "{BF55A86B-B065-4400-8E40-F7E7BC164BE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
