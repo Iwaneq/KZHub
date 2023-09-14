@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KZHub.CardStoringService.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace KZHub.CardStoringService.Data
 {
@@ -8,5 +9,7 @@ namespace KZHub.CardStoringService.Data
         {
             
         }
+
+        public DbSet<Card> Cards { get; set; }
     }
 }
