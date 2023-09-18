@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cardstoring-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cardstoring
+  template:
+    metadata:
+      labels:
+        app: cardstoring
+    spec:
+      containers:
+        - name: kzhub-cardstoringservice
+          image: iwaneq/kzhub-cardstoringservice:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cardstoring-clusterip-srv
+spec:
+  type: ClusterIP
+  selector:
+    app: cardstoring
+  ports:
+  - name: cardstoring
+    protocol: TCP
+    port: 80
+    targetPort: 80

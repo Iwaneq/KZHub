@@ -5,15 +5,18 @@ VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.WebClient", "KZHub.WebClient\KZHub.WebClient.csproj", "{BE15A6C6-AC8F-4393-93F0-7FB7C4890DB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZHub.CardGenerationService", "KZHub.CardGenerationService\KZHub.CardGenerationService.csproj", "{38D95B09-BB7C-4964-884D-A325A3345D38}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardGenerationService", "KZHub.CardGenerationService\KZHub.CardGenerationService.csproj", "{38D95B09-BB7C-4964-884D-A325A3345D38}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6C37B110-61B8-41A6-8084-4AECAF0F674C}"
 	ProjectSection(SolutionItems) = preProject
-		cardgeneration-depl.yaml = cardgeneration-depl.yaml
+		K8S\cardgeneration-depl.yaml = K8S\cardgeneration-depl.yaml
 		cardgeneration-np-srv.yaml = cardgeneration-np-srv.yaml
+		K8S\cardstoring-depl.yaml = K8S\cardstoring-depl.yaml
 		K8S\webclient-depl.yaml = K8S\webclient-depl.yaml
 		K8S\webclient-np-srv.yaml = K8S\webclient-np-srv.yaml
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardStoringService", "KZHub.CardStoringService\KZHub.CardStoringService.csproj", "{BF55A86B-B065-4400-8E40-F7E7BC164BE2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +32,10 @@ Global
 		{38D95B09-BB7C-4964-884D-A325A3345D38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38D95B09-BB7C-4964-884D-A325A3345D38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38D95B09-BB7C-4964-884D-A325A3345D38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF55A86B-B065-4400-8E40-F7E7BC164BE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF55A86B-B065-4400-8E40-F7E7BC164BE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF55A86B-B065-4400-8E40-F7E7BC164BE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF55A86B-B065-4400-8E40-F7E7BC164BE2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
