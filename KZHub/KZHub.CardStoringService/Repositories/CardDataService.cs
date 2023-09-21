@@ -14,6 +14,10 @@ namespace KZHub.CardStoringService.Repositories
 
         public async Task SaveCard(Card card)
         {
+            if(card == null) throw new ArgumentNullException(nameof(card));
+
+            if(string.IsNullOrEmpty(card.Zastep)) throw new ArgumentNullException(nameof(card.Zastep));
+
             _dataContext.Cards.Add(card);
             await _dataContext.SaveChangesAsync();
         }
