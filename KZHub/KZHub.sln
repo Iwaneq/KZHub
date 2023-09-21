@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardStoringService", "KZHub.CardStoringService\KZHub.CardStoringService.csproj", "{BF55A86B-B065-4400-8E40-F7E7BC164BE2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZHub.CardStoringService.Tests", "Tests\KZHub.CardStoringService.Tests\KZHub.CardStoringService.Tests.csproj", "{D5BDF78C-724D-46A2-BC53-5F6E7AD874C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KZHub.CardStoringService.Tests", "Tests\KZHub.CardStoringService.Tests\KZHub.CardStoringService.Tests.csproj", "{D5BDF78C-724D-46A2-BC53-5F6E7AD874C0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{E102414B-0AAD-49A0-85CF-1754174E9061}"
 EndProject

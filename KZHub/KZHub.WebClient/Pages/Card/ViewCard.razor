@@ -1,0 +1,19 @@
+﻿@page "/card/view"
+@using KZHub.WebClient.Services;
+@inject CardState _cardState;
+
+<PageTitle>Review your card!</PageTitle>
+
+<div class="flex-column text-center">
+    <h3>Review your card:</h3>
+
+    @if (_cardState.Card != null)
+    {
+        var card = Convert.ToBase64String(_cardState.Card);
+        <img src="data:image/png;base64,@card" width="500" style="border:3px solid black" />
+    }
+    else
+    {
+        <p>Looks like you haven't made your card yet!</p>
+    }
+</div>

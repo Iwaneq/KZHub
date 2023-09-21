@@ -41,7 +41,7 @@
         //Send data to CardGenerationService
         _cardState.Card = await _messageBusClient.SendCardToGenerate(Card);
 
-        _navigationManager.NavigateTo("/");
+        _navigationManager.NavigateTo("/card/view");
     }
 
     private void AddPoint()
