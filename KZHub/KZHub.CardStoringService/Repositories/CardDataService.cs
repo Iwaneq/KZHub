@@ -17,5 +17,10 @@ namespace KZHub.CardStoringService.Repositories
             _dataContext.Cards.Add(card);
             await _dataContext.SaveChangesAsync();
         }
+
+        public async Task<Card?> GetCard(int id)
+        {
+            return await _dataContext.Cards.FindAsync(id);
+        }
     }
 }
