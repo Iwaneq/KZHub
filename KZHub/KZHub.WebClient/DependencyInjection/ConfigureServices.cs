@@ -8,6 +8,7 @@ namespace KZHub.WebClient.DependencyInjection
         public static void AddServices(this IServiceCollection services)
         {
             services.AddSingleton<ICardGenerationServiceClient, CardGenerationServiceClient>();
+            services.AddSingleton<ICardStorageServiceClient, CardStorageServiceClient>();
             services.AddSingleton<CardState>();
         }
     }

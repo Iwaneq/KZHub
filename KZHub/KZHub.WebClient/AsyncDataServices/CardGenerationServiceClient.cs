@@ -5,7 +5,6 @@ using RabbitMQ.Client.Exceptions;
 using System.Collections.Concurrent;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
 
 namespace KZHub.WebClient.AsyncDataServices
 {
@@ -50,17 +49,17 @@ namespace KZHub.WebClient.AsyncDataServices
 
                 _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
 
-                Console.WriteLine("--> Connected to RabbitMQ");
+                Console.WriteLine("--> Connected Card Generation Service Client to RabbitMQ!");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"--> Could not connect to RabbitMQ: {ex.Message}");
+                Console.WriteLine($"--> Could not connect Card Generation Service Client to RabbitMQ: {ex.Message}");
             }
         }
 
         public Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
-            if (_channel is null) throw new ChannelClosedException("Channel was closed");
+            if (_channel is null) throw new ChannelAllocationException();
 
             IBasicProperties props = _channel.CreateBasicProperties();
             var correlationId = Guid.NewGuid().ToString();
@@ -83,7 +82,7 @@ namespace KZHub.WebClient.AsyncDataServices
                 cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
                 return tcs.Task;
             }
-            throw new ConnectFailureException("Connection was not open", null);
+            throw new ConnectFailureException("Card Generation Service Connection was not open", null);
         }
 
         private void Dispose()
@@ -97,7 +96,7 @@ namespace KZHub.WebClient.AsyncDataServices
 
         private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
         {
-            Console.WriteLine("--> RabbitMQ Connection was shutted down!");
+            Console.WriteLine("--> RabbitMQ Card Generation Service Connection was shutted down!");
         }
     }
 }

@@ -3,6 +3,7 @@
 @using KZHub.WebClient.DTOs.Card;
 @using KZHub.WebClient.Services;
 @inject ICardGenerationServiceClient _cardGenerationServiceClient;
+@inject ICardStorageServiceClient _cardStorageServiceClient;
 @inject NavigationManager _navigationManager;
 @inject CardState _cardState;
 
@@ -58,6 +59,6 @@
 
     private void SaveDraft()
     {
-        
+        _cardGenerationServiceClient.SendCardToGenerate(Card);
     }
 }
