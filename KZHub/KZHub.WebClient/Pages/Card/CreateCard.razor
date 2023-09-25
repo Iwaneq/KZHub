@@ -7,7 +7,7 @@
 @inject CardState _cardState;
 
 
-<h3>Create your new Card!</h3>
+<h3>Stwórz swoją Kartę Zbiórki!</h3>
 
 <EditForm method="post" OnValidSubmit="PostCard" Model="@Card">
     <FluentValidationValidator/>
@@ -30,12 +30,13 @@
 
     <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
 
-    <input class="m-1" type="submit" value="Wyślij!" />
+    <input class="m-1" type="submit" value="Generuj kartę" />
+    <button class="m-1" value="Zapisz szkic" onclick="" />
 </EditForm>
 
 @code {
     public CreateCardDTO Card = new();
-    
+
     private async Task PostCard()
     {
         //Send data to CardGenerationService
@@ -47,5 +48,10 @@
     private void AddPoint()
     {
         Card.Points.Add(new CreatePointDTO());
+    }
+
+    private void SaveDraft()
+    {
+           
     }
 }

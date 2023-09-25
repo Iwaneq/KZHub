@@ -2,10 +2,10 @@
 @using KZHub.WebClient.Services;
 @inject CardState _cardState;
 
-<PageTitle>Review your card!</PageTitle>
+<PageTitle>Podgląd Karty</PageTitle>
 
 <div class="flex-column text-center">
-    <h3>Review your card:</h3>
+    <h3>Twoja Karta Zbiórki:</h3>
 
     @if (_cardState.Card != null)
     {
@@ -14,6 +14,7 @@
     }
     else
     {
-        <p>Looks like you haven't made your card yet!</p>
+        <p>Wygląda na to że jeszcze nie stworzyłeś swojej Karty Zbiórki:c<br/>
+           Wróć do strony "Stwórz Kartę" aby zacząć pracować nad swoją Kartą!</p>
     }
 </div>
