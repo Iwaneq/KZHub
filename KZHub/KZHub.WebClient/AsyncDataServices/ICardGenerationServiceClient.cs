@@ -2,7 +2,7 @@
 
 namespace KZHub.WebClient.AsyncDataServices
 {
-    public interface IMessageBusClient
+    public interface ICardGenerationServiceClient
     {
         Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default);
     }

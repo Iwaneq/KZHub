@@ -2,14 +2,14 @@
 @using KZHub.WebClient.AsyncDataServices;
 @using KZHub.WebClient.DTOs.Card;
 @using KZHub.WebClient.Services;
-@inject IMessageBusClient _messageBusClient;
+@inject ICardGenerationServiceClient _cardGenerationServiceClient;
 @inject NavigationManager _navigationManager;
 @inject CardState _cardState;
 
 
 <h3>Stwórz swoją Kartę Zbiórki!</h3>
 
-<EditForm method="post" OnValidSubmit="PostCard" Model="@Card">
+<EditForm method="post" EditContext="@EditContext" OnValidSubmit="PostCard">
     <FluentValidationValidator/>
     <ValidationSummary/>
     <label class="fw-bold me-2">Zastęp: <input @bind-value="Card.Zastep" /></label>
@@ -31,16 +31,22 @@
     <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
 
     <input class="m-1" type="submit" value="Generuj kartę" />
-    <button class="m-1" value="Zapisz szkic" onclick="" />
+    <button class="m-1" type="button" @onclick="SaveDraft">Zapisz Szkic</button>
 </EditForm>
 
 @code {
     public CreateCardDTO Card = new();
+    EditContext? EditContext;
+
+    protected override void OnInitialized()
+    {
+        EditContext = new(Card);
+    }
 
     private async Task PostCard()
     {
         //Send data to CardGenerationService
-        _cardState.Card = await _messageBusClient.SendCardToGenerate(Card);
+        _cardState.Card = await _cardGenerationServiceClient.SendCardToGenerate(Card);
 
         _navigationManager.NavigateTo("/card/view");
     }
@@ -52,6 +58,6 @@
 
     private void SaveDraft()
     {
-           
+        
     }
 }

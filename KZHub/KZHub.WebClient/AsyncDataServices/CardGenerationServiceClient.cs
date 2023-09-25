@@ -9,7 +9,7 @@ using System.Threading.Channels;
 
 namespace KZHub.WebClient.AsyncDataServices
 {
-    public class MessageBusClient : IMessageBusClient
+    public class CardGenerationServiceClient : ICardGenerationServiceClient
     {
         private readonly IConfiguration _configuration;
         private readonly IConnection? _connection;
@@ -18,7 +18,7 @@ namespace KZHub.WebClient.AsyncDataServices
 
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]>> callbackMapper = new();
 
-        public MessageBusClient(IConfiguration configuration, IServiceProvider serviceProvider)
+        public CardGenerationServiceClient(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
             var factory = new ConnectionFactory()
