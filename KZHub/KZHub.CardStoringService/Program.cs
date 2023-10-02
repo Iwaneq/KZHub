@@ -1,4 +1,6 @@
+using KZHub.CardStoringService.Data;
 using KZHub.CardStoringService.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
 
 namespace KZHub.CardStoringService
 {
@@ -17,6 +19,8 @@ namespace KZHub.CardStoringService
             builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
+
+            app.Services.GetRequiredService<DataContext>().Database.Migrate();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -19,7 +19,7 @@ namespace KZHub.CardStoringService.DependencyInjection
             }
             else
             {
-                Console.WriteLine("--> Using SQL Server Database");
+                Console.WriteLine($"--> Using SQL Server Database: {builder.Configuration.GetConnectionString("CardsDB")}");
                 services.AddDbContext<DataContext>(options =>
                 {
                     options.UseSqlServer(builder.Configuration.GetConnectionString("CardsDB"));
