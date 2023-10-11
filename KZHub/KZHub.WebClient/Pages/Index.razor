@@ -1,16 +1,8 @@
 ﻿@page "/"
-@using KZHub.WebClient.Services;
-@using SkiaSharp;
-@inject CardState _cardState;
 
-<PageTitle>Index</PageTitle>
+<PageTitle>KZHub</PageTitle>
 
-@if(_cardState.Card != null)
-{
-    var card = Convert.ToBase64String(_cardState.Card);
-    <img src="data:image/png;base64,@card" width="300" style="border:3px solid black" />
-}
-
-@code{
-
-}
+<div class="flex-column text-center">
+    <h3>Witaj na KZHubie!</h3>
+    <p>Twoim internetowym porcie KZMakera:D</p>
+</div>
