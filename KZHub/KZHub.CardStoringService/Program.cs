@@ -20,7 +20,10 @@ namespace KZHub.CardStoringService
 
             var app = builder.Build();
 
-            app.Services.GetRequiredService<DataContext>().Database.Migrate();
+            if (app.Environment.IsProduction())
+            {
+                app.Services.GetRequiredService<DataContext>().Database.Migrate(); 
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

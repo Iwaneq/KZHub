@@ -73,13 +73,50 @@ namespace KZHub.CardStoringService.AsyncDataServices
                     {
                         var card = mapper.Map<Card>(cardDTO);
                         cardRepository.SaveCard(card);
+
+                        SendSaveStateBackToWebClient(ea,card);
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine($"--> EXCEPTION WAS THROWN WHILE SAVING CARD: {ex.Message}");
+
+                        SendSaveStateBackToWebClient(ea,error: ex.Message);
                     }
                 }
             }
+        }
+
+        private void SendSaveStateBackToWebClient(BasicDeliverEventArgs ea, Card? card = null, string? error = null)
+        {
+            var props = ea.BasicProperties;
+            var replyProps = _channel!.CreateBasicProperties();
+            replyProps.CorrelationId = props.CorrelationId;
+
+            SaveCardStateDTO state = new SaveCardStateDTO();
+
+            if(error is null)
+            {
+                state.IsSaved = true;
+            }
+            else
+            {
+                state.Error = error;
+            }
+
+            if(card != null)
+            {
+                state.CardId = card.Id;
+            }
+
+            var dataJson = JsonSerializer.Serialize(state);
+            var data = Encoding.UTF8.GetBytes(dataJson);
+
+            _channel!.BasicPublish(exchange: string.Empty,
+                routingKey: props.ReplyTo,
+                mandatory: false,
+                basicProperties: replyProps,
+                body: data);
+            _channel!.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)

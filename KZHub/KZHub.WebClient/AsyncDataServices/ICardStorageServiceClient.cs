@@ -4,6 +4,6 @@ namespace KZHub.WebClient.AsyncDataServices
 {
     public interface ICardStorageServiceClient
     {
-        Task<bool> SendCardToStorage(CreateCardDTO createCard, CancellationToken cancellationToken = default);
+        Task<SaveCardStateDTO> SendCardToStorage(CreateCardDTO createCard, CancellationToken cancellationToken = default);
     }
 }

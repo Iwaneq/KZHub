@@ -6,6 +6,7 @@
 @inject ICardStorageServiceClient _cardStorageServiceClient;
 @inject NavigationManager _navigationManager;
 @inject CardState _cardState;
+@inject IToastService _toastService;
 
 
 <h3>Stwórz swoją Kartę Zbiórki!</h3>
@@ -57,8 +58,23 @@
         Card.Points.Add(new CreatePointDTO());
     }
 
-    private void SaveDraft()
+    private async Task SaveDraft()
     {
-        _cardStorageServiceClient.SendCardToStorage(Card);
+        if(!EditContext?.Validate() ?? false)
+        {
+            _toastService.ShowError("Karta nie została uzupełniona poprawnie!");
+            return;
+        }
+
+        var state = await _cardStorageServiceClient.SendCardToStorage(Card);
+
+        if (state.IsSaved)
+        {
+            _toastService.ShowSuccess("Karta została zapisana!");
+        }
+        else
+        {
+            _toastService.ShowError($"Karta nie mogła zostać zapisana: {state.Error}");
+        }
     }
 }

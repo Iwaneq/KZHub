@@ -1,4 +1,5 @@
-﻿using KZHub.WebClient.AsyncDataServices;
+﻿using Blazored.Toast;
+using KZHub.WebClient.AsyncDataServices;
 using KZHub.WebClient.Services;
 
 namespace KZHub.WebClient.DependencyInjection
@@ -10,6 +11,7 @@ namespace KZHub.WebClient.DependencyInjection
             services.AddSingleton<ICardGenerationServiceClient, CardGenerationServiceClient>();
             services.AddSingleton<ICardStorageServiceClient, CardStorageServiceClient>();
             services.AddSingleton<CardState>();
+            services.AddBlazoredToast();
         }
     }
 }
