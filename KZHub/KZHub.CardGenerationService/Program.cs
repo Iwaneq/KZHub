@@ -1,4 +1,3 @@
-
 using KZHub.CardGenerationService.DependencyInjection;
 
 namespace KZHub.CardGenerationService

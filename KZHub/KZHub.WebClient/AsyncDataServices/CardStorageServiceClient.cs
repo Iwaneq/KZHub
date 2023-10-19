@@ -17,6 +17,8 @@ namespace KZHub.WebClient.AsyncDataServices
 
         private readonly ConcurrentDictionary<string, TaskCompletionSource<SaveCardStateDTO>> callbackMapper = new();
 
+        #region Setup / Constructor
+
         public CardStorageServiceClient(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -41,7 +43,7 @@ namespace KZHub.WebClient.AsyncDataServices
                     var dataJson = Encoding.UTF8.GetString(ea.Body.ToArray());
                     var state = JsonSerializer.Deserialize<SaveCardStateDTO>(dataJson);
 
-                    if(state == null) throw new NullReferenceException("Save Card State was null");
+                    if (state == null) throw new NullReferenceException("Save Card State was null");
 
                     tcs.TrySetResult(state);
                 };
@@ -59,7 +61,13 @@ namespace KZHub.WebClient.AsyncDataServices
                 Console.WriteLine($"--> Could not connect Card Storage Service Client to RabbitMQ: {ex.Message}");
             }
         }
-        
+
+        private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
+        {
+            Console.WriteLine("--> RabbitMQ Card Storage Service Connection was shutted down!");
+        } 
+
+        #endregion
 
         public Task<SaveCardStateDTO> SendCardToStorage(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
@@ -89,11 +97,6 @@ namespace KZHub.WebClient.AsyncDataServices
                 return tcs.Task;
             }
             throw new ConnectFailureException("Card Storage Service Connection was not open", null);
-        }
-
-        private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
-        {
-            Console.WriteLine("--> RabbitMQ Card Storage Service Connection was shutted down!");
         }
     }
 }

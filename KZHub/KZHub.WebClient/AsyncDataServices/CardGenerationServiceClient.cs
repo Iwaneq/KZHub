@@ -17,6 +17,8 @@ namespace KZHub.WebClient.AsyncDataServices
 
         private readonly ConcurrentDictionary<string, TaskCompletionSource<byte[]>> callbackMapper = new();
 
+        #region Setup / Constructor
+
         public CardGenerationServiceClient(IConfiguration configuration, IServiceProvider serviceProvider)
         {
             _configuration = configuration;
@@ -56,6 +58,12 @@ namespace KZHub.WebClient.AsyncDataServices
                 Console.WriteLine($"--> Could not connect Card Generation Service Client to RabbitMQ: {ex.Message}");
             }
         }
+        private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
+        {
+            Console.WriteLine("--> RabbitMQ Card Generation Service Connection was shutted down!");
+        }
+
+        #endregion
 
         public Task<byte[]> SendCardToGenerate(CreateCardDTO createCard, CancellationToken cancellationToken = default)
         {
@@ -77,26 +85,12 @@ namespace KZHub.WebClient.AsyncDataServices
                 _channel.BasicPublish(exchange: string.Empty,
                     routingKey: "cardGeneration_queue",
                     basicProperties: props,
-                body: body);
+                    body: body);
 
                 cancellationToken.Register(() => callbackMapper.TryRemove(correlationId, out _));
                 return tcs.Task;
             }
             throw new ConnectFailureException("Card Generation Service Connection was not open", null);
-        }
-
-        private void Dispose()
-        {
-            if (_channel != null && _channel.IsOpen)
-            {
-                _channel.Close();
-                _connection?.Close();
-            }
-        }
-
-        private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
-        {
-            Console.WriteLine("--> RabbitMQ Card Generation Service Connection was shutted down!");
         }
     }
 }
