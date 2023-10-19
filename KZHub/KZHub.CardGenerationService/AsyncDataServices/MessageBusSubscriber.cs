@@ -2,21 +2,23 @@
 using KZHub.CardGenerationService.Services.CardProcessing.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using SkiaSharp;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Channels;
+using RabbitMQ.Client.Exceptions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KZHub.CardGenerationService.AsyncDataServices
 {
     public class MessageBusSubscriber : BackgroundService
     {
         private readonly IConfiguration _configuration;
-        private readonly IServiceScopeFactory _scopeFactory;
         private IConnection? _connection;
         private IModel? _channel;
 
-        public MessageBusSubscriber(IConfiguration configuration, IServiceScopeFactory scopeFactory)
+        private readonly IServiceScopeFactory _scopeFactory;
+
+
+        #region Setup / Constructor 
+
+        public MessageBusSubscriber(IConfiguration configuration, ICardGenerationProcessor processor, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
             _scopeFactory = scopeFactory;
@@ -45,73 +47,52 @@ namespace KZHub.CardGenerationService.AsyncDataServices
         private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
         {
             Console.WriteLine("--> Connection was shutted down");
-        }
+        } 
 
-        private void GenerateCardFromCreateCardDTO(BasicDeliverEventArgs ea)
-        {
-            if (_channel is null) throw new ChannelClosedException("Channel was closed");
-
-            var props = ea.BasicProperties;
-            var replyProps = _channel.CreateBasicProperties();
-            replyProps.CorrelationId = props.CorrelationId;
-
-            var body = ea.Body;
-            var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
-
-            CreateCardDTO? cardDTO = JsonSerializer.Deserialize<CreateCardDTO>(notificationMessage);
-
-            Console.WriteLine($"--> Consumer Reciving... {cardDTO}");
-            if (cardDTO is not null)
-            {
-                using (var scope = _scopeFactory.CreateScope())
-                {
-                    var cardGenerator = scope.ServiceProvider.GetRequiredService<ICardGenerator>();
-                    SKBitmap card;
-
-                    try
-                    {
-                        card = cardGenerator.GenerateCard(cardDTO);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"--> EXCEPTION WAS THROWN WHILE GENERATING CARD: {ex.Message}");
-                        throw;
-                    }
-
-                    Console.WriteLine("--> Consumer Received");
-
-                    using (MemoryStream memStream = new MemoryStream())
-                    using (SKManagedWStream wstream = new SKManagedWStream(memStream))
-                    {
-                        card.Encode(wstream, SKEncodedImageFormat.Png, 100);
-                        byte[] data = memStream.ToArray();
-
-                        _channel.BasicPublish(exchange: string.Empty,
-                             routingKey: props.ReplyTo,
-                             basicProperties: replyProps,
-                             body: data);
-                        _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
-                        Console.WriteLine("--> Card was sent to the Client");
-                    }
-                }
-            }
-        }
+        #endregion
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            if (_channel is null) throw new ChannelErrorException(0);
             stoppingToken.ThrowIfCancellationRequested();
 
             var consumer = new EventingBasicConsumer(_channel);
 
             consumer.Received += (ModuleHandle, ea) =>
             {
-                GenerateCardFromCreateCardDTO(ea);
+                byte[] data = CallCardGenerator(ea);
+
+                SendDataBackToWebClient(data, ea);
             };
 
             _channel.BasicConsume(queue: "cardGeneration_queue", autoAck: false, consumer: consumer);
 
             return Task.CompletedTask;
         }
+
+        private byte[] CallCardGenerator(BasicDeliverEventArgs ea)
+        {
+            using (var scope = _scopeFactory.CreateScope())
+            {
+               return scope.ServiceProvider.GetRequiredService<ICardGenerationProcessor>().GenerateCardFromCreateCardDTO(ea);
+            }
+        }
+
+        private void SendDataBackToWebClient(byte[] data, BasicDeliverEventArgs ea)
+        {
+            var props = ea.BasicProperties;
+            var replyProps = _channel!.CreateBasicProperties();
+            replyProps.CorrelationId = props.CorrelationId;
+
+            _channel.BasicPublish(exchange: string.Empty,
+                    routingKey: props.ReplyTo,
+                    basicProperties: replyProps,
+                    body: data);
+            _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
+            Console.WriteLine("--> Card was sent to the Client");
+        }
+
+        #region IDisposable
 
         public override void Dispose()
         {
@@ -122,6 +103,8 @@ namespace KZHub.CardGenerationService.AsyncDataServices
             }
 
             base.Dispose();
-        }
+        } 
+
+        #endregion
     }
 }
