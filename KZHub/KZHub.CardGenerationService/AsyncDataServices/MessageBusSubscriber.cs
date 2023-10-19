@@ -60,18 +60,9 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
             consumer.Received += (ModuleHandle, ea) =>
             {
-                byte[] data = CallCardGenerator();
+                byte[] data = CallCardGenerator(ea);
 
-                var props = ea.BasicProperties;
-                var replyProps = _channel.CreateBasicProperties();
-                replyProps.CorrelationId = props.CorrelationId;
-
-                _channel.BasicPublish(exchange: string.Empty,
-                        routingKey: props.ReplyTo,
-                        basicProperties: replyProps,
-                        body: data);
-                _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
-                Console.WriteLine("--> Card was sent to the Client");
+                SendDataBackToWebClient(data, ea);
             };
 
             _channel.BasicConsume(queue: "cardGeneration_queue", autoAck: false, consumer: consumer);
@@ -79,12 +70,26 @@ namespace KZHub.CardGenerationService.AsyncDataServices
             return Task.CompletedTask;
         }
 
-        private byte[] CallCardGenerator()
+        private byte[] CallCardGenerator(BasicDeliverEventArgs ea)
         {
             using (var scope = _scopeFactory.CreateScope())
             {
                return scope.ServiceProvider.GetRequiredService<ICardGenerationProcessor>().GenerateCardFromCreateCardDTO(ea);
             }
+        }
+
+        private void SendDataBackToWebClient(byte[] data, BasicDeliverEventArgs ea)
+        {
+            var props = ea.BasicProperties;
+            var replyProps = _channel!.CreateBasicProperties();
+            replyProps.CorrelationId = props.CorrelationId;
+
+            _channel.BasicPublish(exchange: string.Empty,
+                    routingKey: props.ReplyTo,
+                    basicProperties: replyProps,
+                    body: data);
+            _channel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
+            Console.WriteLine("--> Card was sent to the Client");
         }
 
         #region IDisposable

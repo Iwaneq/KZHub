@@ -17,6 +17,8 @@ namespace KZHub.CardStoringService.AsyncDataServices
         private IConnection? _connection;
         private IModel? _channel;
 
+        #region Setup / Constructor
+
         public MessageBusSubscriber(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
@@ -52,61 +54,42 @@ namespace KZHub.CardStoringService.AsyncDataServices
             Console.WriteLine("--> Connection was shutted down");
         }
 
-        private void SaveCard(BasicDeliverEventArgs ea)
+
+        #endregion
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             if (_channel is null) throw new ChannelAllocationException();
 
-            var body = ea.Body;
-            var notificationMessage = Encoding.UTF8.GetString(body.ToArray());
+            stoppingToken.ThrowIfCancellationRequested();
 
-            CreateCardDTO? cardDTO = JsonSerializer.Deserialize<CreateCardDTO>(notificationMessage);
+            var consumer = new EventingBasicConsumer(_channel);
 
-            Console.WriteLine($"--> Consumer Reciving... {cardDTO}");
-            if(cardDTO is not null)
+            consumer.Received += (ModuleHandle, ea) =>
             {
-                using (var scope = _scopeFactory.CreateScope())
-                {
-                    var cardRepository = scope.ServiceProvider.GetRequiredService<ICardDataService>();
-                    var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+                var state = CallSaveCardProcessor(ea);
 
-                    try
-                    {
-                        var card = mapper.Map<Card>(cardDTO);
-                        cardRepository.SaveCard(card);
+                SendSaveStateBackToWebClient(state, ea);
+            };
 
-                        SendSaveStateBackToWebClient(ea,card);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"--> EXCEPTION WAS THROWN WHILE SAVING CARD: {ex.Message}");
+            _channel.BasicConsume(queue: "cardStorage_queue", autoAck: false, consumer: consumer);
 
-                        SendSaveStateBackToWebClient(ea,error: ex.Message);
-                    }
-                }
+            return Task.CompletedTask;
+        }
+
+        private SaveCardStateDTO CallSaveCardProcessor(BasicDeliverEventArgs ea)
+        {
+            using(var scope = _scopeFactory.CreateScope())
+            {
+                return scope.ServiceProvider.GetRequiredService<ISaveCardProcessor>().SaveCard(ea);
             }
         }
 
-        private void SendSaveStateBackToWebClient(BasicDeliverEventArgs ea, Card? card = null, string? error = null)
+        private void SendSaveStateBackToWebClient(SaveCardStateDTO state, BasicDeliverEventArgs ea)
         {
             var props = ea.BasicProperties;
             var replyProps = _channel!.CreateBasicProperties();
             replyProps.CorrelationId = props.CorrelationId;
-
-            SaveCardStateDTO state = new SaveCardStateDTO();
-
-            if(error is null)
-            {
-                state.IsSaved = true;
-            }
-            else
-            {
-                state.Error = error;
-            }
-
-            if(card != null)
-            {
-                state.CardId = card.Id;
-            }
 
             var dataJson = JsonSerializer.Serialize(state);
             var data = Encoding.UTF8.GetBytes(dataJson);
@@ -119,31 +102,19 @@ namespace KZHub.CardStoringService.AsyncDataServices
             _channel!.BasicAck(deliveryTag: ea.DeliveryTag, multiple: true);
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            stoppingToken.ThrowIfCancellationRequested();
-
-            var consumer = new EventingBasicConsumer(_channel);
-
-            consumer.Received += (ModuleHandle, ea) =>
-            {
-                SaveCard(ea);
-            };
-
-            _channel.BasicConsume(queue: "cardStorage_queue", autoAck: false, consumer: consumer);
-
-            return Task.CompletedTask;
-        }
+        #region IDisposable
 
         public override void Dispose()
         {
-            if(_channel != null && _channel.IsOpen)
+            if (_channel != null && _channel.IsOpen)
             {
                 _channel.Close();
                 _connection?.Close();
             }
 
             base.Dispose();
-        }
+        } 
+
+        #endregion
     }
 }

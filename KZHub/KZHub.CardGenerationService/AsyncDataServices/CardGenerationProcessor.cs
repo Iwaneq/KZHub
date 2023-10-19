@@ -40,7 +40,7 @@ namespace KZHub.CardGenerationService.AsyncDataServices
                 return EncodeCardToByteArray(card);
             }
 
-            return new byte[0];
+            throw new ArgumentNullException(nameof(cardDto), "Couldn't deserialize data or the data was null");
         }
 
         private byte[] EncodeCardToByteArray(SKBitmap card)
