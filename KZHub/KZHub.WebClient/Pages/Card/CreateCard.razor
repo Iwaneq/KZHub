@@ -8,33 +8,39 @@
 @inject CardState _cardState;
 @inject IToastService _toastService;
 
+<AuthorizeView>
+    <Authorized>
+        <h3>Stwórz swoją Kartę Zbiórki!</h3>
 
-<h3>Stwórz swoją Kartę Zbiórki!</h3>
+        <EditForm Context="editCtx" method="post" EditContext="@EditContext" OnValidSubmit="PostCard">
+            <FluentValidationValidator/>
+            <ValidationSummary/>
+            <label class="fw-bold me-2">Zastęp: <input @bind-value="Card.Zastep" /></label>
+            <label class="fw-bold me-2">Datum: <input @bind-value="Card.Date" type="date" /></label>
+            <label class="fw-bold me-2">Miejsce: <input @bind-value="Card.Place" /></label><br />
 
-<EditForm method="post" EditContext="@EditContext" OnValidSubmit="PostCard">
-    <FluentValidationValidator/>
-    <ValidationSummary/>
-    <label class="fw-bold me-2">Zastęp: <input @bind-value="Card.Zastep" /></label>
-    <label class="fw-bold me-2">Datum: <input @bind-value="Card.Date" type="date" /></label>
-    <label class="fw-bold me-2">Miejsce: <input @bind-value="Card.Place" /></label><br />
+            @foreach(var p in Card.Points)
+            {
+                <div class="d-block m-2">
+                    <label class="fw-bold me-2">Czas: <input @bind-value="p.Time" type="time" /></label>
+                    <label class="fw-bold me-2">Co robimy? <input @bind-value="p.Title" /></label>
+                    <ValidationMessage For="@(() => p.Title)"/>
+                    <label class="fw-bold me-2">Kto? <input @bind-value="p.ZastepMember" /></label>
+                    <ValidationMessage For="@(() => p.ZastepMember)" />
+                </div>
+            }
+            <button class="m-1" @onclick="AddPoint" type="button">Dodaj punkt zbiórki!</button><br/>
 
-    @foreach(var p in Card.Points)
-    {
-        <div class="d-block m-2">
-            <label class="fw-bold me-2">Czas: <input @bind-value="p.Time" type="time" /></label>
-            <label class="fw-bold me-2">Co robimy? <input @bind-value="p.Title" /></label>
-            <ValidationMessage For="@(() => p.Title)"/>
-            <label class="fw-bold me-2">Kto? <input @bind-value="p.ZastepMember" /></label>
-            <ValidationMessage For="@(() => p.ZastepMember)" />
-        </div>
-    }
-    <button class="m-1" @onclick="AddPoint" type="button">Dodaj punkt zbiórki!</button><br/>
+            <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
 
-    <label class="fw-bold m-1">Co trzeba zabrać?<input @bind-value="Card.RequiredItems" /></label><br />
-
-    <input class="m-1" type="submit" value="Generuj kartę" />
-    <button class="m-1" type="button" @onclick="SaveDraft">Zapisz Szkic</button>
-</EditForm>
+            <input class="m-1" type="submit" value="Generuj kartę" />
+            <button class="m-1" type="button" @onclick="SaveDraft">Zapisz Szkic</button>
+        </EditForm>
+    </Authorized>
+    <NotAuthorized>
+        Sorry, you are not authorized!
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
     public CreateCardDTO Card = new();

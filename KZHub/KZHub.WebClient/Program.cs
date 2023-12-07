@@ -1,4 +1,8 @@
 using KZHub.WebClient.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using KZHub.WebClient.Data;
+using KZHub.WebClient.Areas.Identity;
 
 namespace KZHub.WebClient
 {
@@ -12,7 +16,7 @@ namespace KZHub.WebClient
             builder.Services.AddRazorPages();
             builder.Services.AddServerSideBlazor();
 
-            builder.Services.AddServices();
+            builder.Services.AddServices(builder.Configuration);
 
             var app = builder.Build();
 
@@ -29,6 +33,8 @@ namespace KZHub.WebClient
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
