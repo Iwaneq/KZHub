@@ -6,15 +6,15 @@
 <AuthorizeView>
     <Authorized>
         <a href="Identity/Account/Manage/Index">
-            Hello, @context.User.Identity.Name!
+            Czuwaj, @context.User.Identity.Name!
         </a>
         <form action="/Identity/Account/Logout?returnUrl=%2F" method="post">
-            <button class="nav-link btn btn-link" type="submit">Logout</button>
+            <button class="nav-link btn btn-link" type="submit">Wyloguj</button>
             <input name="__RequestVerificationToken" type="hidden" value="@TokenProvider.XsrfToken" />
         </form>
     </Authorized>
     <NotAuthorized>
-        <a href="/Identity/Account/Register">Register</a>
-        <a href="/Identity/Account/Login">Login</a>
+        <a href="/Identity/Account/Register">Zarejestruj</a>
+        <a href="/Identity/Account/Login">Zaloguj</a>
     </NotAuthorized>
 </AuthorizeView>
