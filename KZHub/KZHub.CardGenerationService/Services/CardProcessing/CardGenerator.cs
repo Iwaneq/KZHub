@@ -24,15 +24,19 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
 
             using (SKCanvas canvas = new SKCanvas(card))
             {
-                if (!string.IsNullOrEmpty(cardDTO.Zastep)) DrawZastep(canvas, cardDTO.Zastep);
+                using(var fontStream = new FileStream(Path.Combine(Environment.CurrentDirectory, @"Resources", "ARIAL.TTF"), FileMode.Open))
+                {
+                    var typeFace = SKTypeface.FromStream(fontStream);
+                    if (!string.IsNullOrEmpty(cardDTO.Zastep)) DrawZastep(canvas, cardDTO.Zastep, typeFace);
 
-                DrawDate(canvas, cardDTO.Date);
+                    DrawDate(canvas, cardDTO.Date, typeFace);
 
-                if (!string.IsNullOrEmpty(cardDTO.Place)) DrawPlace(canvas, cardDTO.Place);
+                    if (!string.IsNullOrEmpty(cardDTO.Place)) DrawPlace(canvas, cardDTO.Place, typeFace);
 
-                if (cardDTO.Points.Count != 0) DrawPoints(canvas, cardDTO.Points);
+                    if (cardDTO.Points.Count != 0) DrawPoints(canvas, cardDTO.Points, typeFace);
 
-                if (!string.IsNullOrEmpty(cardDTO.RequiredItems)) DrawRequiredItems(canvas, cardDTO.RequiredItems);
+                    if (!string.IsNullOrEmpty(cardDTO.RequiredItems)) DrawRequiredItems(canvas, cardDTO.RequiredItems, typeFace);
+                }   
             }
 
             Console.WriteLine("--> Card was generated!");
@@ -40,9 +44,9 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
             return card;
         }
 
-        private void DrawZastep(SKCanvas card, string zastep)
+        private void DrawZastep(SKCanvas card, string zastep, SKTypeface typeface)
         {
-            SKPaint zastepFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), TextSize = 38 };
+            SKPaint zastepFont = new SKPaint() { Typeface = typeface, TextSize = 38 };
 
             if (zastep.Length > 10)
             {
@@ -52,25 +56,25 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
             card.DrawText(zastep, zastepRect.Location, zastepFont);
         }
 
-        private void DrawDate(SKCanvas card, DateTime date)
+        private void DrawDate(SKCanvas card, DateTime date, SKTypeface typeface)
         {
-            SKPaint datumFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), TextSize = 25 };
+            SKPaint datumFont = new SKPaint() { Typeface = typeface, TextSize = 25 };
 
             string month = GetMonthString(date.Month);
 
             card.DrawText($"{date.Day} {month} {date.Year}", dateRect.Location, datumFont);
         }
 
-        private void DrawPlace(SKCanvas card, string place)
+        private void DrawPlace(SKCanvas card, string place, SKTypeface typeface)
         {
-            SKPaint placeFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), TextSize = 30 };
+            SKPaint placeFont = new SKPaint() { Typeface = typeface, TextSize = 30,  };
 
             card.DrawText(place, placeRect.Location, placeFont);
         }
 
-        private void DrawPoints(SKCanvas card, List<CreatePointDTO> points)
+        private void DrawPoints(SKCanvas card, List<CreatePointDTO> points, SKTypeface typeface)
         {
-            SKPaint pointsFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), TextSize = 20 };
+            SKPaint pointsFont = new SKPaint() { Typeface = typeface, TextSize = 20 };
 
             float height = 585 / points.Count;
 
@@ -121,9 +125,9 @@ namespace KZHub.CardGenerationService.Services.CardProcessing
             }
         }
 
-        public void DrawRequiredItems(SKCanvas card, string? requiredItems)
+        public void DrawRequiredItems(SKCanvas card, string? requiredItems, SKTypeface typeface)
         {
-            SKPaint requiredItemsFont = new SKPaint() { Typeface = SKTypeface.FromFamilyName("Arial", SKFontStyle.Bold), TextSize = 30 };
+            SKPaint requiredItemsFont = new SKPaint() { Typeface = typeface, TextSize = 30 };
 
             WrapLines(requiredItems, requiredItemsRect.Width, card, requiredItemsFont, requiredItemsRect.Left, requiredItemsRect.Top);
         }

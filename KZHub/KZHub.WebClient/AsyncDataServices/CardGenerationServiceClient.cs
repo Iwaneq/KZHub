@@ -80,6 +80,7 @@ namespace KZHub.WebClient.AsyncDataServices
 
             if (_connection != null && _connection.IsOpen)
             {
+                Console.WriteLine("--> Sending Card to CardGenerationService...");
                 var body = Encoding.UTF8.GetBytes(message);
 
                 _channel.BasicPublish(exchange: string.Empty,

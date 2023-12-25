@@ -1,20 +1,30 @@
 ﻿@page "/card/view"
 @using KZHub.WebClient.Services;
 @inject CardState _cardState;
+@inject NavigationManager _navManager;
 
 <PageTitle>Podgląd Karty</PageTitle>
 
-<div class="flex-column text-center">
-    <h3>Twoja Karta Zbiórki:</h3>
+<AuthorizeView>
+    <Authorized>
+        <div class="flex-column text-center">
+            <h3>Twoja Karta Zbiórki:</h3>
 
-    @if (_cardState.Card != null)
-    {
-        var card = Convert.ToBase64String(_cardState.Card);
-        <img src="data:image/png;base64,@card" width="500" style="border:3px solid black" />
-    }
-    else
-    {
-        <p>Wygląda na to że jeszcze nie stworzyłeś swojej Karty Zbiórki:c<br/>
-           Wróć do strony "Stwórz Kartę" aby zacząć pracować nad swoją Kartą!</p>
-    }
-</div>
+            @if (_cardState.Card != null)
+            {
+                var card = Convert.ToBase64String(_cardState.Card);
+                <img src="data:image/png;base64,@card" width="500" style="border:3px solid black" />
+            }
+            else
+            {
+                <p>
+                    Wygląda na to że jeszcze nie stworzyłeś swojej Karty Zbiórki:c<br />
+                    Wróć do strony "Stwórz Kartę" aby zacząć pracować nad swoją Kartą!
+                </p>
+            }
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin/>
+    </NotAuthorized>
+</AuthorizeView>

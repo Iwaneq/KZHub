@@ -3,7 +3,6 @@ using KZHub.CardGenerationService.Services.CardProcessing.Interfaces;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KZHub.CardGenerationService.AsyncDataServices
 {
@@ -18,7 +17,7 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
         #region Setup / Constructor 
 
-        public MessageBusSubscriber(IConfiguration configuration, ICardGenerationProcessor processor, IServiceScopeFactory scopeFactory)
+        public MessageBusSubscriber(IConfiguration configuration, IServiceScopeFactory scopeFactory)
         {
             _configuration = configuration;
             _scopeFactory = scopeFactory;
@@ -28,20 +27,26 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
         private void InitializeRabbitMQ()
         {
-            var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQHost"], Port = int.Parse(_configuration["RabbitMQPort"]!) };
+            try{
+                var factory = new ConnectionFactory() { HostName = _configuration["RabbitMQHost"], Port = int.Parse(_configuration["RabbitMQPort"]!) };
 
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-            _channel.QueueDeclare(queue: "cardGeneration_queue",
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
-            _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
+                _channel.QueueDeclare(queue: "cardGeneration_queue",
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null);
+                _channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
 
-            Console.WriteLine("--> Listening on the RabbitMQ");
+                Console.WriteLine("--> Listening on the RabbitMQ...");
 
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+                _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"--> Error occured while initializing RabbitMQ: {ex.Message}");
+            }
         }
 
         private void RabbitMQ_ConnectionShutdown(object? sender, ShutdownEventArgs e)
@@ -53,7 +58,8 @@ namespace KZHub.CardGenerationService.AsyncDataServices
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            if (_channel is null) throw new ChannelErrorException(0);
+            if (_channel is null) throw new ChannelAllocationException();
+
             stoppingToken.ThrowIfCancellationRequested();
 
             var consumer = new EventingBasicConsumer(_channel);
@@ -74,7 +80,16 @@ namespace KZHub.CardGenerationService.AsyncDataServices
         {
             using (var scope = _scopeFactory.CreateScope())
             {
-               return scope.ServiceProvider.GetRequiredService<ICardGenerationProcessor>().GenerateCardFromCreateCardDTO(ea);
+                try
+                {
+                   return scope.ServiceProvider.GetRequiredService<ICardGenerationProcessor>().GenerateCardFromCreateCardDTO(ea);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"--> Exception was thrown while calling Card Generator: {ex.Message}");
+                }
+
+                return new byte[0];
             }
         }
 

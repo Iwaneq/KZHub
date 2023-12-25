@@ -19,6 +19,9 @@
 **/node_modules
 **/npm-debug.log
 **/obj
+# Exclude build artifacts
+**/bin/
+**/obj/
 **/secrets.dev.yaml
 **/values.dev.yaml
 LICENSE

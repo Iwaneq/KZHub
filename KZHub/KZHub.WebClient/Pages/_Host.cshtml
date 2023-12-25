@@ -1,7 +1,15 @@
 ﻿@page "/"
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 @using Microsoft.AspNetCore.Components.Web
 @namespace KZHub.WebClient.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    var token = Xsrf.GetAndStoreTokens(HttpContext);
+    var tokens = new TokenProvider
+    {
+        XsrfToken = token.RequestToken ?? ""
+    };
+}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,7 +24,7 @@
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
 <body>
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+    <component type="typeof(App)" param-initialState="tokens" render-mode="ServerPrerendered" />
 
     <div id="blazor-error-ui">
         <environment include="Staging,Production">

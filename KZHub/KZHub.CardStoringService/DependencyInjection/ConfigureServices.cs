@@ -27,6 +27,7 @@ namespace KZHub.CardStoringService.DependencyInjection
             }
 
             services.AddScoped<ICardDataService, CardDataService>();
+            services.AddScoped<ISaveCardProcessor, SaveCardProcessor>();
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddHostedService<MessageBusSubscriber>();
