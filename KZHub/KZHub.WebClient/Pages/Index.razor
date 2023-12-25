@@ -2,7 +2,14 @@
 
 <PageTitle>KZHub</PageTitle>
 
-<div class="flex-column text-center">
-    <h3>Witaj na KZHubie!</h3>
-    <p>Twoim internetowym porcie KZMakera:D</p>
-</div>
+<AuthorizeView>
+    <Authorized>
+        <div class="flex-column text-center">
+            <h3>Witaj na KZHubie!</h3>
+            <p>Twoim internetowym porcie KZMakera:D</p>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <RedirectToLogin/>
+    </NotAuthorized>
+</AuthorizeView>
