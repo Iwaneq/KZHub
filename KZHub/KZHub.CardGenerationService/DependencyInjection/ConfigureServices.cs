@@ -9,6 +9,7 @@ namespace KZHub.CardGenerationService.DependencyInjection
         public static void AddServices(this IServiceCollection services)
         {
             services.AddScoped<ICardGenerator, CardGenerator>();
+            services.AddScoped<ICardGenerationProcessor, CardGenerationProcessor>();
             services.AddHostedService<MessageBusSubscriber>();
         }
     }
